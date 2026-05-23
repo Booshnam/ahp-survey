@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AHP — Harm Category Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d0f14;--surface:#13161d;--panel:#1a1e28;--border:rgba(255,255,255,0.07);
+    --border-hi:rgba(255,255,255,0.18);--text:#e8eaf0;--muted:#7a7f94;
+    --accent:#6c8ef7;--accent2:#a78bfa;--danger:#f87171;--success:#34d399;--amber:#fbbf24;--gold:#f59e0b;
+    --sans:'Instrument Sans',sans-serif;--serif:'DM Serif Display',serif;--mono:'DM Mono',monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;}
+
+  /* LOGIN */
+  #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem;flex-direction:column;gap:1rem;}
+  .login-card{background:var(--surface);border:1px solid var(--border-hi);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:420px;display:flex;flex-direction:column;gap:1.2rem;}
+  .login-logo{font-family:var(--serif);font-size:1.5rem;line-height:1.2;}
+  .login-logo em{font-style:italic;color:var(--accent2);}
+  .login-sub{font-size:0.82rem;color:var(--muted);line-height:1.65;}
+  .field label{display:block;font-size:0.72rem;color:var(--muted);margin-bottom:5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;}
+  .field input{width:100%;padding:0.65rem 0.9rem;border-radius:8px;border:1px solid var(--border-hi);background:var(--panel);color:var(--text);font-family:var(--sans);font-size:0.88rem;outline:none;transition:border-color 0.15s;}
+  .field input:focus{border-color:var(--accent);}
+  .btn-login{width:100%;padding:0.75rem;border-radius:8px;border:1px solid rgba(108,142,247,0.4);background:rgba(108,142,247,0.15);color:var(--accent);font-family:var(--sans);font-size:0.9rem;font-weight:600;cursor:pointer;transition:background 0.15s;}
+  .btn-login:hover{background:rgba(108,142,247,0.28);}
+  .login-err{font-size:0.8rem;color:var(--danger);background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);border-radius:6px;padding:8px 12px;display:none;}
+  .login-note{font-size:0.72rem;color:var(--muted);text-align:center;line-height:1.5;}
+
+  /* TOPBAR */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1.5rem;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;}
+  .topbar-title{font-family:var(--serif);font-size:1rem;}
+  .topbar-title em{font-style:italic;color:var(--accent2);}
+  .topbar-title.admin-mode em{color:var(--gold);}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .user-badge{font-family:var(--mono);font-size:0.72rem;color:var(--muted);background:var(--panel);border:1px solid var(--border-hi);border-radius:20px;padding:4px 12px;}
+  .admin-badge{font-family:var(--mono);font-size:0.72rem;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:var(--gold);border-radius:20px;padding:4px 12px;}
+  .btn-sm{font-family:var(--sans);font-size:0.78rem;padding:5px 13px;border-radius:6px;border:1px solid var(--border-hi);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+  .btn-sm:hover{color:var(--danger);border-color:rgba(248,113,113,0.4);}
+  .btn-sm.refresh{color:var(--accent);}
+  .btn-sm.refresh:hover{color:var(--accent);background:rgba(108,142,247,0.1);border-color:rgba(108,142,247,0.4);}
+
+  /* CONTAINER */
+  .container{max-width:1000px;margin:0 auto;padding:2rem 1.5rem;}
+  header{margin-bottom:2rem;}
+  .eyebrow{font-family:var(--mono);font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;}
+  .eyebrow.gold{color:var(--gold);}
+  h1{font-family:var(--serif);font-size:clamp(1.7rem,4vw,2.8rem);font-weight:400;line-height:1.15;margin-bottom:0.6rem;}
+  h1 em{font-style:italic;color:var(--accent2);}
+  h1 em.gold{color:var(--gold);}
+  .subtitle{font-size:0.86rem;color:var(--muted);line-height:1.7;max-width:620px;}
+
+  /* PROGRESS */
+  .progress-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.9rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+  .prog-bar-track{flex:1;min-width:100px;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;}
+  .prog-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.4s ease;}
+  .prog-label{font-family:var(--mono);font-size:0.75rem;color:var(--muted);}
+  .prog-pct{font-family:var(--mono);font-size:0.88rem;color:var(--accent);font-weight:500;}
+
+  /* SAVE BANNER */
+  .save-banner{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:rgba(108,142,247,0.07);border:1px solid rgba(108,142,247,0.2);border-radius:10px;padding:0.8rem 1.25rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+  .save-info{font-size:0.82rem;color:var(--muted);}
+  .save-info strong{color:var(--text);}
+  .btn-save{font-family:var(--sans);font-size:0.85rem;font-weight:600;padding:0.5rem 1.3rem;border-radius:8px;border:1px solid rgba(108,142,247,0.45);background:rgba(108,142,247,0.15);color:var(--accent);cursor:pointer;transition:all 0.15s;}
+  .btn-save:hover{background:rgba(108,142,247,0.28);}
+  .btn-save:disabled{opacity:0.35;cursor:not-allowed;}
+  .save-status{font-family:var(--mono);font-size:0.74rem;}
+  .save-status.ok{color:var(--success);}.save-status.err{color:var(--danger);}
+
+  /* CR BOX */
+  .cr-box{border-radius:10px;padding:0.8rem 1.2rem;font-size:0.82rem;margin-bottom:1.5rem;border:1px solid transparent;font-family:var(--mono);}
+  .cr-ok{background:rgba(52,211,153,0.07);border-color:rgba(52,211,153,0.22);color:var(--success);}
+  .cr-warn{background:rgba(251,191,36,0.07);border-color:rgba(251,191,36,0.22);color:var(--amber);}
+  .cr-bad{background:rgba(248,113,113,0.07);border-color:rgba(248,113,113,0.22);color:var(--danger);}
+  .cr-neutral{background:var(--panel);border-color:var(--border);color:var(--muted);}
+
+  /* SCALE LEGEND */
+  .legend{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+  .legend-chip{font-family:var(--mono);font-size:0.7rem;padding:3px 9px;border-radius:20px;border:1px solid var(--border-hi);display:flex;align-items:center;gap:5px;color:var(--muted);}
+  .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+  /* PAIRS */
+  .pairs-list{display:flex;flex-direction:column;gap:10px;margin-bottom:2.5rem;}
+  .pair-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;display:grid;grid-template-columns:1fr 210px 1fr;align-items:center;gap:1rem;transition:border-color 0.2s;}
+  .pair-card:hover{border-color:var(--border-hi);}
+  .cat-label{font-size:0.82rem;font-weight:500;color:var(--text);line-height:1.3;}
+  .cat-label.right{text-align:right;}
+  .cat-label.al{color:var(--accent);}.cat-label.ar{color:var(--accent2);}
+  .slider-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;}
+  .pair-idx{font-family:var(--mono);font-size:0.6rem;color:var(--muted);opacity:0.5;}
+  input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:linear-gradient(to right,var(--accent) 0%,var(--border-hi) 50%,var(--accent2) 100%);outline:none;cursor:pointer;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--text);border:2px solid var(--bg);box-shadow:0 0 0 3px rgba(108,142,247,0.28);transition:box-shadow 0.15s;}
+  input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 5px rgba(108,142,247,0.2);}
+  .slider-lbl{font-family:var(--mono);font-size:0.7rem;color:var(--muted);text-align:center;min-height:2em;line-height:1.3;}
+
+  /* SUCCESS OVERLAY */
+  #success-overlay{display:none;position:fixed;inset:0;background:rgba(13,15,20,0.85);z-index:100;align-items:center;justify-content:center;padding:1rem;}
+  #success-overlay.show{display:flex;}
+  .success-card{background:var(--surface);border:1px solid rgba(52,211,153,0.3);border-radius:16px;padding:2.5rem 2rem;max-width:380px;width:100%;text-align:center;display:flex;flex-direction:column;gap:1rem;align-items:center;}
+  .success-icon{font-size:3rem;}
+  .success-title{font-family:var(--serif);font-size:1.5rem;color:var(--success);}
+  .success-sub{font-size:0.84rem;color:var(--muted);line-height:1.65;}
+  .btn-done{padding:0.6rem 2rem;border-radius:8px;border:1px solid rgba(52,211,153,0.35);background:rgba(52,211,153,0.1);color:var(--success);font-family:var(--sans);font-size:0.88rem;font-weight:600;cursor:pointer;}
+  .btn-done:hover{background:rgba(52,211,153,0.2);}
+
+  /* ── ADMIN STYLES ── */
+  .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:2.5rem;}
+  .stat{background:var(--surface);padding:0.85rem 1rem;display:flex;flex-direction:column;gap:0.2rem;}
+  .stat-label{font-size:0.67rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;font-family:var(--mono);}
+  .stat-value{font-family:var(--mono);font-size:1.25rem;font-weight:500;color:var(--text);}
+  .stat-value.gold{color:var(--gold);}.stat-value.ok{color:var(--success);}.stat-value.warn{color:var(--amber);}.stat-value.bad{color:var(--danger);}
+
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:2rem;overflow-x:auto;}
+  .tab-btn{font-family:var(--sans);font-size:0.82rem;font-weight:500;padding:0.6rem 1.1rem;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.15s,border-color 0.15s;border-radius:6px 6px 0 0;white-space:nowrap;}
+  .tab-btn:hover{color:var(--text);}.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+  .tab-panel{display:none;}.tab-panel.active{display:block;}
+
+  .section-head{display:flex;align-items:baseline;gap:0.75rem;margin-bottom:1rem;}
+  .section-num{font-family:var(--mono);font-size:0.68rem;color:var(--gold);background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.22);border-radius:4px;padding:2px 7px;}
+  .section-title{font-size:1rem;font-weight:600;}
+  .section-sub{font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.65;}
+
+  .u-table{width:100%;border-collapse:collapse;margin-bottom:2rem;}
+  .u-table th{background:var(--panel);color:var(--muted);font-family:var(--mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;padding:8px 12px;text-align:left;border:1px solid var(--border);}
+  .u-table td{padding:9px 12px;border:1px solid var(--border);font-size:0.82rem;vertical-align:middle;}
+  .u-table tr:hover td{background:rgba(255,255,255,0.02);}
+  .u-name{font-family:var(--mono);color:var(--accent);}
+  .cr-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-family:var(--mono);}
+  .cr-pill.ok{background:rgba(52,211,153,0.1);color:var(--success);}
+  .cr-pill.warn{background:rgba(251,191,36,0.1);color:var(--amber);}
+  .cr-pill.bad{background:rgba(248,113,113,0.1);color:var(--danger);}
+
+  .result-bars{display:flex;flex-direction:column;gap:9px;margin-bottom:2rem;}
+  .rbar-row{display:grid;grid-template-columns:170px 1fr 65px;align-items:center;gap:12px;}
+  .rbar-name{font-size:0.78rem;color:var(--muted);text-align:right;line-height:1.3;}
+  .rbar-track{height:20px;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;}
+  .rbar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.5s cubic-bezier(0.4,0,0.2,1);}
+  .rbar-pct{font-family:var(--mono);font-size:0.78rem;font-weight:500;}
+
+  .w-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:2rem;}
+  .w-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:0.8rem 1rem;}
+  .w-card:hover{border-color:var(--border-hi);}
+  .w-card-name{font-size:0.7rem;color:var(--muted);margin-bottom:3px;line-height:1.3;}
+  .w-card-val{font-family:var(--mono);font-size:1.3rem;font-weight:500;}
+  .w-card-sub{font-family:var(--mono);font-size:0.68rem;color:var(--muted);margin-top:2px;}
+  .w-card-rank{font-family:var(--mono);font-size:0.66rem;color:var(--gold);}
+
+  .matrix-wrap{overflow-x:auto;margin-bottom:2rem;}
+  .matrix-tbl{border-collapse:collapse;font-size:0.68rem;min-width:700px;}
+  .matrix-tbl th{background:var(--panel);color:var(--muted);padding:6px 7px;text-align:center;border:1px solid var(--border);font-weight:500;white-space:nowrap;font-family:var(--mono);}
+  .matrix-tbl th.rh{text-align:left;font-size:0.64rem;}
+  .matrix-tbl td{padding:5px 7px;text-align:center;border:1px solid var(--border);font-family:var(--mono);}
+  .matrix-tbl td.diag{background:var(--panel);color:var(--muted);}
+  .matrix-tbl td.pri{font-weight:600;color:var(--gold);background:rgba(245,158,11,0.06);}
+
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:0.55rem 1.1rem;border-radius:8px;font-family:var(--sans);font-size:0.84rem;font-weight:500;cursor:pointer;transition:all 0.15s;border:1px solid var(--border-hi);background:transparent;color:var(--text);}
+  .btn:hover{background:rgba(255,255,255,0.05);}
+  .btn-gold{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.32);color:var(--gold);}
+  .btn-gold:hover{background:rgba(245,158,11,0.2);}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1.5rem;}
+  .export-box{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1.2rem;font-family:var(--mono);font-size:0.75rem;color:var(--muted);white-space:pre-wrap;line-height:1.75;max-height:260px;overflow-y:auto;margin-bottom:1rem;}
+
+  .empty-state{text-align:center;padding:3rem 1rem;color:var(--muted);font-size:0.88rem;}
+  .empty-state .icon{font-size:2.5rem;margin-bottom:0.75rem;}
+  .loading{text-align:center;padding:2rem;font-family:var(--mono);font-size:0.8rem;color:var(--muted);}
+
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px;}
+  footer{margin-top:3rem;padding:1.25rem 0 2rem;border-top:1px solid var(--border);font-size:0.72rem;color:var(--muted);text-align:center;}
+
+  @media(max-width:600px){
+    .pair-card{grid-template-columns:1fr;gap:0.5rem;}
+    .cat-label.right{text-align:left;}
+    .rbar-row{grid-template-columns:100px 1fr 50px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">AHP Survey<br><em>Harm Category Weighting</em></div>
+    <p class="login-sub">Enter your name and a passcode to record your pairwise judgments. Administrators: use your admin credentials.</p>
+    <div class="field"><label>Name / Username</label><input type="text" id="inp-name" placeholder="Your full name" autocomplete="off"></div>
+    <div class="field"><label>Passcode / Password</label><input type="password" id="inp-pass" placeholder="Your passcode" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-err" id="login-err"></div>
+    <button class="btn-login" onclick="doLogin()">Enter →</button>
+    <p class="login-note">New user? Any passcode you set becomes yours. Returning? Use the same passcode to resume.</p>
+  </div>
+</div>
+
+<!-- ══ USER VIEW ══ -->
+<div id="user-app" style="display:none">
+  <div class="topbar">
+    <div class="topbar-title">AHP <em>Harm Weights Survey</em></div>
+    <div class="topbar-right">
+      <span class="user-badge" id="u-topbar-user">—</span>
+      <button class="btn-sm" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="container">
+    <header>
+      <p class="eyebrow">Pairwise Comparison · Saaty Scale</p>
+      <h1>Rate Harm Category<br><em>Severity</em></h1>
+      <p class="subtitle">For each pair, indicate which category represents greater harm potential when amplified by AI on social media, and by how much. Your expert judgment matters.</p>
+    </header>
+    <div class="progress-wrap">
+      <span class="prog-label">Progress</span>
+      <div class="prog-bar-track"><div class="prog-bar-fill" id="prog-fill" style="width:0%"></div></div>
+      <span class="prog-pct" id="prog-pct">0 / 45</span>
+    </div>
+    <div class="save-banner">
+      <div class="save-info">Responding as <strong id="u-banner-user">—</strong></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="save-status" id="u-save-status"></span>
+        <button class="btn-save" id="u-btn-save" onclick="userSave()" disabled>Submit responses</button>
+      </div>
+    </div>
+    <div class="cr-box cr-neutral" id="u-cr-box">Adjust sliders to begin. Your consistency ratio will appear here.</div>
+    <div class="legend">
+      <div class="legend-chip"><span class="dot" style="background:#6c8ef7"></span>1 equal</div>
+      <div class="legend-chip"><span class="dot" style="background:#8da8f8"></span>3 moderate</div>
+      <div class="legend-chip"><span class="dot" style="background:#c4a8f5"></span>5 strong</div>
+      <div class="legend-chip"><span class="dot" style="background:#b48af0"></span>7 very strong</div>
+      <div class="legend-chip"><span class="dot" style="background:#a78bfa"></span>9 extreme</div>
+    </div>
+    <div class="pairs-list" id="pairs-list"></div>
+  </div>
+  <footer>AHP Harm Weights Survey · AI Incidents Research · Saaty (1980)</footer>
+</div>
+
+<!-- ══ ADMIN VIEW ══ -->
+<div id="admin-app" style="display:none">
+  <div class="topbar">
+    <div class="topbar-title admin-mode">AHP <em>Admin Dashboard</em></div>
+    <div class="topbar-right">
+      <span class="admin-badge">⚙ Admin</span>
+      <button class="btn-sm refresh" onclick="adminLoad()">↻ Refresh</button>
+      <button class="btn-sm" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="container">
+    <header>
+      <p class="eyebrow gold">Administrator View · Restricted</p>
+      <h1>Survey <em class="gold">Dashboard</em></h1>
+      <p class="subtitle">All respondent submissions, consensus weights, individual comparisons, and export tools.</p>
+    </header>
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-label">Respondents</span><span class="stat-value gold" id="a-resp">—</span></div>
+      <div class="stat"><span class="stat-label">Avg CR</span><span class="stat-value" id="a-avg-cr">—</span></div>
+      <div class="stat"><span class="stat-label">Consistent</span><span class="stat-value ok" id="a-ok">—</span></div>
+      <div class="stat"><span class="stat-label">Borderline</span><span class="stat-value warn" id="a-warn">—</span></div>
+      <div class="stat"><span class="stat-label">Inconsistent</span><span class="stat-value bad" id="a-bad">—</span></div>
+      <div class="stat"><span class="stat-label">Last response</span><span class="stat-value" id="a-last" style="font-size:0.8rem">—</span></div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="responses" onclick="aTab('responses',this)">① Respondents</button>
+      <button class="tab-btn" data-tab="consensus" onclick="aTab('consensus',this)">② Consensus Weights</button>
+      <button class="tab-btn" data-tab="individual" onclick="aTab('individual',this)">③ Individual Weights</button>
+      <button class="tab-btn" data-tab="matrix" onclick="aTab('matrix',this)">④ Consensus Matrix</button>
+      <button class="tab-btn" data-tab="export" onclick="aTab('export',this)">⑤ Export</button>
+    </div>
+    <div class="tab-panel active" id="tab-responses">
+      <div class="section-head"><span class="section-num">01</span><span class="section-title">All respondents</span></div>
+      <p class="section-sub">All survey participants with their consistency ratio and submission time.</p>
+      <div id="a-responses-content"><div class="loading">Loading…</div></div>
+      <!-- delete confirm modal -->
+      <div id="delete-modal" style="display:none;position:fixed;inset:0;background:rgba(13,15,20,0.88);z-index:200;align-items:center;justify-content:center;padding:1rem">
+        <div style="background:var(--surface);border:1px solid rgba(248,113,113,0.35);border-radius:14px;padding:2rem 1.75rem;max-width:380px;width:100%;display:flex;flex-direction:column;gap:1.1rem">
+          <div style="font-family:var(--serif);font-size:1.3rem">Delete response?</div>
+          <p style="font-size:0.83rem;color:var(--muted);line-height:1.65">You are about to permanently delete the submission from <strong id="del-name" style="color:var(--text)">—</strong>. This will update all consensus weights and matrices immediately.</p>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button onclick="closeDeleteModal()" style="padding:0.55rem 1.1rem;border-radius:8px;border:1px solid var(--border-hi);background:transparent;color:var(--muted);font-family:var(--sans);font-size:0.85rem;cursor:pointer">Cancel</button>
+            <button id="del-confirm-btn" onclick="confirmDelete()" style="padding:0.55rem 1.2rem;border-radius:8px;border:1px solid rgba(248,113,113,0.45);background:rgba(248,113,113,0.15);color:var(--danger);font-family:var(--sans);font-size:0.85rem;font-weight:600;cursor:pointer">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-consensus">
+      <div class="section-head"><span class="section-num">02</span><span class="section-title">Consensus weights</span></div>
+      <p class="section-sub">Geometric mean of all respondents' priority vectors (Saaty &amp; Vargas, 2007).</p>
+      <div id="a-consensus-content"><div class="loading">Loading…</div></div>
+    </div>
+    <div class="tab-panel" id="tab-individual">
+      <div class="section-head"><span class="section-num">03</span><span class="section-title">Individual weight comparison</span></div>
+      <p class="section-sub">Side-by-side priority vectors for each respondent vs. consensus. Click a respondent's name to view their full weights and pairwise matrix.</p>
+      <div id="a-individual-content"><div class="loading">Loading…</div></div>
+      <!-- per-person drill-down -->
+      <div id="a-person-detail" style="display:none;margin-top:2rem">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap">
+          <div class="section-head" style="margin-bottom:0"><span class="section-num" id="pd-initials">—</span><span class="section-title" id="pd-name">—</span></div>
+          <span id="pd-cr-pill" class="cr-pill">—</span>
+          <span style="font-family:var(--mono);font-size:0.72rem;color:var(--muted)" id="pd-ts">—</span>
+          <button class="btn" style="margin-left:auto;font-size:0.78rem;padding:4px 12px" onclick="document.getElementById('a-person-detail').style.display='none'">✕ Close</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem" id="pd-weight-grid"></div>
+        <div class="section-head"><span class="section-num">↓</span><span class="section-title">Individual pairwise matrix</span></div>
+        <p class="section-sub" style="margin-bottom:1rem">Full 10×10 comparison matrix derived from this respondent's slider values.</p>
+        <div class="matrix-wrap"><table class="matrix-tbl" id="pd-matrix"></table></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-matrix">
+      <div class="section-head"><span class="section-num">04</span><span class="section-title">Consensus pairwise matrix</span></div>
+      <p class="section-sub">Geometric mean of all individual matrices — the aggregated matrix for reporting.</p>
+      <div id="a-matrix-content"><div class="loading">Loading…</div></div>
+    </div>
+    <div class="tab-panel" id="tab-export">
+      <div class="section-head"><span class="section-num">05</span><span class="section-title">Export</span></div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="aCopyPython()">Copy Python dict (consensus)</button>
+        <button class="btn" onclick="aDownloadExcelConsensus()">⬇ Consensus weights (Excel)</button>
+        <button class="btn" onclick="aDownloadExcelIndividual()">⬇ Individual weights (Excel)</button>
+        <button class="btn" onclick="aDownloadExcelMatrix()">⬇ Consensus matrix (Excel)</button>
+        <button class="btn" onclick="aDownloadJSON()">⬇ Full JSON</button>
+      </div>
+      <div class="export-box" id="a-export-box">// Loading…</div>
+    </div>
+  </div>
+  <footer>AHP Admin Dashboard · AI Incidents Research · Restricted Access</footer>
+</div>
+
+<!-- ══ SUCCESS ══ -->
+<div id="success-overlay">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Responses Saved!</div>
+    <p class="success-sub">Thank you, <strong id="success-name">—</strong>. Your pairwise judgments have been recorded successfully.</p>
+    <button class="btn-done" onclick="document.getElementById('success-overlay').classList.remove('show')">Continue editing</button>
+  </div>
+</div>
+
+<script>
+// ══ CONFIG ══════════════════════════════════════════════════════════════════
+// Admin credentials — change ADMIN_USER and ADMIN_PASS to whatever you want
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "ahp2024";   // ← change this to your desired password
+
+// ══ AHP DATA ════════════════════════════════════════════════════════════════
+const CATS = [
+  "Suicide & Self-Harm","Child Exploitation & CSAM","Sexual Violence & NCII",
+  "Harassment & Cyberbullying","Hate Speech & Extremism","Violence & Physical Harm",
+  "Mental Health Harm","State Surveillance & Repression","Disinformation & Manipulation",
+  "Exploitation of Vulnerable Groups"
+];
+const SHORT = ["Suicide","Child Expl.","Sexual Viol.","Harassment","Hate Speech","Violence","Mental Health","Surveillance","Disinformation","Vuln. Groups"];
+const N = CATS.length;
+const RI10 = 1.49;
+const PAIRS = [];
+for(let i=0;i<N;i++) for(let j=i+1;j<N;j++) PAIRS.push([i,j]);
+
+// ══ STATE ════════════════════════════════════════════════════════════════════
+let currentUser = null, isAdmin = false;
+let sliderVals = new Array(PAIRS.length).fill(0);
+let allRecords = [];
+
+// ══ STORAGE KEYS (shared=true so same artifact instance shares data) ════════
+const uKey   = name => `ahp:u:${name.toLowerCase().replace(/\s+/g,'_')}`;
+const idxKey = `ahp:index`;
+
+// ══ HASH ════════════════════════════════════════════════════════════════════
+async function sha256(s){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ══ LOGIN ════════════════════════════════════════════════════════════════════
+async function doLogin(){
+  const name = document.getElementById('inp-name').value.trim();
+  const pass = document.getElementById('inp-pass').value.trim();
+  const err  = document.getElementById('login-err');
+  err.style.display = 'none';
+
+  if(!name || !pass){ showErr('Please enter both fields.'); return; }
+
+  // Admin check (plain comparison — fine for research tool)
+  if(name.toLowerCase() === ADMIN_USER.toLowerCase() && pass === ADMIN_PASS){
+    currentUser = ADMIN_USER; isAdmin = true;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-app').style.display = 'block';
+    adminLoad();
+    return;
+  }
+
+  // User check
+  if(name.length < 2){ showErr('Name must be at least 2 characters.'); return; }
+  if(pass.length < 4){ showErr('Passcode must be at least 4 characters.'); return; }
+
+  const hash = await sha256(pass);
+  try {
+    const existing = await window.storage.get(uKey(name), true);
+    if(existing){
+      const rec = JSON.parse(existing.value);
+      if(rec.passHash !== hash){ showErr('Incorrect passcode for this name.'); return; }
+      sliderVals = rec.sliderVals || new Array(PAIRS.length).fill(0);
+    } else {
+      sliderVals = new Array(PAIRS.length).fill(0);
+    }
+  } catch(e){ sliderVals = new Array(PAIRS.length).fill(0); }
+
+  currentUser = name; isAdmin = false;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('user-app').style.display = 'block';
+  document.getElementById('u-topbar-user').textContent = name;
+  document.getElementById('u-banner-user').textContent = name;
+  buildPairs();
+  updateProgress();
+  computeCR();
+}
+
+function showErr(msg){ const e=document.getElementById('login-err');e.textContent=msg;e.style.display='block'; }
+
+function doLogout(){
+  currentUser=null; isAdmin=false;
+  sliderVals=new Array(PAIRS.length).fill(0); allRecords=[];
+  document.getElementById('user-app').style.display='none';
+  document.getElementById('admin-app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('inp-name').value='';
+  document.getElementById('inp-pass').value='';
+  document.getElementById('login-err').style.display='none';
+}
+
+// ══ USER: SAVE ═══════════════════════════════════════════════════════════════
+async function userSave(){
+  const btn=document.getElementById('u-btn-save');
+  const st=document.getElementById('u-save-status');
+  btn.disabled=true; st.className='save-status'; st.textContent='Saving…';
+
+  const {w,CR} = ahp(buildMatrix());
+  const hash   = await sha256(document.getElementById('inp-pass').value.trim());
+
+  const record = { name:currentUser, passHash:hash, sliderVals, weights:Array.from(w), CR, savedAt:new Date().toISOString() };
+
+  try{
+    await window.storage.set(uKey(currentUser), JSON.stringify(record), true);
+    // update index
+    let idx=[];
+    try{ const r=await window.storage.get(idxKey,true); if(r) idx=JSON.parse(r.value); }catch(e){}
+    const uid=currentUser.toLowerCase().replace(/\s+/g,'_');
+    if(!idx.includes(uid)){ idx.push(uid); await window.storage.set(idxKey,JSON.stringify(idx),true); }
+
+    st.className='save-status ok'; st.textContent='✓ Saved '+new Date().toLocaleTimeString();
+    btn.disabled=false;
+    document.getElementById('success-name').textContent=currentUser;
+    document.getElementById('success-overlay').classList.add('show');
+  }catch(e){
+    st.className='save-status err'; st.textContent='✗ Save failed. Try again.';
+    btn.disabled=false;
+  }
+}
+
+// ══ USER: PAIRS UI ════════════════════════════════════════════════════════════
+function buildPairs(){
+  const list=document.getElementById('pairs-list');
+  list.innerHTML='';
+  PAIRS.forEach(([i,j],idx)=>{
+    const v=sliderVals[idx];
+    const card=document.createElement('div');
+    card.className='pair-card';
+    card.innerHTML=`
+      <div class="${v<0?'cat-label al':'cat-label'}" id="ll-${idx}">${CATS[i]}</div>
+      <div class="slider-wrap">
+        <div class="pair-idx">${idx+1} of ${PAIRS.length}</div>
+        <input type="range" min="-8" max="8" step="1" value="${v}" data-idx="${idx}" oninput="onSlide(this)">
+        <div class="slider-lbl" id="lbl-${idx}">${sLabel(v,i,j)}</div>
+      </div>
+      <div class="${v>0?'cat-label ar':'cat-label right'}" id="lr-${idx}">${CATS[j]}</div>`;
+    list.appendChild(card);
+  });
+}
+
+function onSlide(el){
+  const idx=+el.dataset.idx, v=+el.value;
+  sliderVals[idx]=v;
+  const [i,j]=PAIRS[idx];
+  document.getElementById(`lbl-${idx}`).textContent=sLabel(v,i,j);
+  document.getElementById(`ll-${idx}`).className=v<0?'cat-label al':'cat-label';
+  document.getElementById(`lr-${idx}`).className=v>0?'cat-label ar':'cat-label right';
+  updateProgress(); computeCR();
+  document.getElementById('u-btn-save').disabled=false;
+  document.getElementById('u-save-status').textContent='';
+}
+
+function sLabel(v,i,j){
+  if(v===0) return 'equal importance (1)';
+  const av=Math.abs(v)+1;
+  const words=['','','slightly','','moderately','','strongly','','very strongly','','extremely'];
+  return v<0?`${SHORT[i]} ${words[av]||av+'×'} more harmful (${av})`:`${SHORT[j]} ${words[av]||av+'×'} more harmful (${av})`;
+}
+
+function updateProgress(){
+  const moved=sliderVals.filter(v=>v!==0).length;
+  document.getElementById('prog-fill').style.width=(moved/PAIRS.length*100)+'%';
+  document.getElementById('prog-pct').textContent=`${moved} / ${PAIRS.length}`;
+}
+
+function computeCR(){
+  const moved=sliderVals.filter(v=>v!==0).length;
+  const box=document.getElementById('u-cr-box');
+  if(!moved){box.className='cr-box cr-neutral';box.textContent='Adjust sliders to begin. Your consistency ratio will appear here.';return;}
+  const {CR}=ahp(buildMatrix());
+  const p=(CR*100).toFixed(2);
+  if(CR<0.1){box.className='cr-box cr-ok';box.textContent=`Consistency Ratio: ${p}% — Good. Your judgments are consistent.`;}
+  else if(CR<0.2){box.className='cr-box cr-warn';box.textContent=`Consistency Ratio: ${p}% — Borderline. Consider revisiting some pairs.`;}
+  else{box.className='cr-box cr-bad';box.textContent=`Consistency Ratio: ${p}% — Too high. Please review your comparisons.`;}
+}
+
+// ══ AHP CORE ═════════════════════════════════════════════════════════════════
+function ratio(v){ return v===0?1:v>0?v+1:1/(1-v); }
+
+function buildMatrix(){
+  const mat=Array.from({length:N},()=>new Array(N).fill(1));
+  PAIRS.forEach(([i,j],idx)=>{ const r=ratio(sliderVals[idx]); mat[i][j]=r; mat[j][i]=1/r; });
+  return mat;
+}
+
+function ahp(mat){
+  const cs=new Array(N).fill(0);
+  for(let j=0;j<N;j++) for(let i=0;i<N;i++) cs[j]+=mat[i][j];
+  const nm=mat.map(row=>row.map((v,j)=>v/cs[j]));
+  const w=nm.map(row=>row.reduce((a,b)=>a+b,0)/N);
+  const Aw=w.map((_,i)=>mat[i].reduce((s,v,j)=>s+v*w[j],0));
+  const lam=Aw.reduce((s,v,i)=>s+v/w[i],0)/N;
+  const CI=(lam-N)/(N-1);
+  const CR=N>2?CI/RI10:0;
+  return{w,lam,CI,CR};
+}
+
+// ══ DELETE ════════════════════════════════════════════════════════════════════
+let pendingDeleteUid = null;
+
+function promptDelete(uid, name) {
+  pendingDeleteUid = uid;
+  document.getElementById('del-name').textContent = name;
+  document.getElementById('delete-modal').style.display = 'flex';
+}
+function closeDeleteModal() {
+  pendingDeleteUid = null;
+  document.getElementById('delete-modal').style.display = 'none';
+}
+async function confirmDelete() {
+  if (!pendingDeleteUid) return;
+  const btn = document.getElementById('del-confirm-btn');
+  btn.textContent = 'Deleting…'; btn.disabled = true;
+  try {
+    await window.storage.delete(`ahp:u:${pendingDeleteUid}`, true);
+    let idx = [];
+    try { const r = await window.storage.get(idxKey, true); if (r) idx = JSON.parse(r.value); } catch(e) {}
+    idx = idx.filter(u => u !== pendingDeleteUid);
+    await window.storage.set(idxKey, JSON.stringify(idx), true);
+  } catch(e) {}
+  closeDeleteModal();
+  btn.textContent = 'Delete'; btn.disabled = false;
+  await adminLoad();
+}
+
+// ══ ADMIN: LOAD ═══════════════════════════════════════════════════════════════
+async function adminLoad(){
+  let idx=[];
+  try{ const r=await window.storage.get(idxKey,true); if(r) idx=JSON.parse(r.value); }catch(e){}
+  allRecords=[];
+  for(const uid of idx){
+    try{ const r=await window.storage.get(`ahp:u:${uid}`,true); if(r) allRecords.push(JSON.parse(r.value)); }catch(e){}
+  }
+  allRecords.sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
+  aStats(); aRenderResponses(); aRenderConsensus(); aRenderIndividual(); aRenderMatrix(); aRenderExport();
+}
+
+function aStats(){
+  const n=allRecords.length;
+  document.getElementById('a-resp').textContent=n||'0';
+  if(!n){['a-avg-cr','a-ok','a-warn','a-bad','a-last'].forEach(id=>document.getElementById(id).textContent='—');return;}
+  const crs=allRecords.map(r=>+r.CR||0);
+  document.getElementById('a-avg-cr').textContent=(crs.reduce((a,b)=>a+b,0)/n*100).toFixed(1)+'%';
+  document.getElementById('a-ok').textContent=crs.filter(c=>c<0.1).length;
+  document.getElementById('a-warn').textContent=crs.filter(c=>c>=0.1&&c<0.2).length;
+  document.getElementById('a-bad').textContent=crs.filter(c=>c>=0.2).length;
+  const last=allRecords[0]?.savedAt;
+  document.getElementById('a-last').textContent=last?new Date(last).toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+}
+
+function aRenderResponses(){
+  const el=document.getElementById('a-responses-content');
+  if(!allRecords.length){el.innerHTML=empty('No responses yet. Share the survey link with participants.');return;}
+  let h=`<table class="u-table"><thead><tr><th>#</th><th>Respondent</th><th>CR</th><th>Status</th><th>Submitted</th><th>Pairs answered</th><th>Action</th></tr></thead><tbody>`;
+  allRecords.forEach((r,i)=>{
+    const cr=+r.CR||0, p=cr<0.1?'ok':cr<0.2?'warn':'bad', l=cr<0.1?'Consistent':cr<0.2?'Borderline':'Inconsistent';
+    const ts=r.savedAt?new Date(r.savedAt).toLocaleString('en-IN'):'—';
+    const mv=(r.sliderVals||[]).filter(v=>v!==0).length;
+    const uid=r.name.toLowerCase().replace(/\s+/g,'_');
+    h+=`<tr><td style="font-family:var(--mono);font-size:0.7rem;color:var(--muted)">${i+1}</td>
+      <td class="u-name">${r.name||'—'}</td>
+      <td style="font-family:var(--mono);font-size:0.78rem">${(cr*100).toFixed(2)}%</td>
+      <td><span class="cr-pill ${p}">${l}</span></td>
+      <td style="font-family:var(--mono);font-size:0.72rem;color:var(--muted)">${ts}</td>
+      <td style="font-family:var(--mono);font-size:0.78rem">${mv} / 45</td>
+      <td><button onclick="promptDelete('${uid}','${r.name}')" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(248,113,113,0.35);background:rgba(248,113,113,0.08);color:var(--danger);font-family:var(--sans);font-size:0.75rem;cursor:pointer">Delete</button></td></tr>`;
+  });
+  el.innerHTML=h+'</tbody></table>';
+}
+
+function aRenderConsensus(){
+  const el=document.getElementById('a-consensus-content');
+  if(!allRecords.length){el.innerHTML=empty('No responses yet.');return;}
+  const geo=geoMean();
+  const sorted=[...geo.keys()].sort((a,b)=>geo[b]-geo[a]);
+  const mx=Math.max(...geo);
+  let h='<div class="result-bars">'+sorted.map(i=>`
+    <div class="rbar-row">
+      <div class="rbar-name">${SHORT[i]}</div>
+      <div><div class="rbar-track"><div class="rbar-fill" style="width:${(geo[i]/mx*100).toFixed(1)}%"></div></div></div>
+      <div class="rbar-pct">${(geo[i]*100).toFixed(2)}%</div>
+    </div>`).join('')+'</div>';
+  h+='<div class="w-cards">'+sorted.map((i,rank)=>`
+    <div class="w-card">
+      <div class="w-card-name">${CATS[i]}</div>
+      <div class="w-card-val">${(geo[i]*N).toFixed(3)}</div>
+      <div class="w-card-sub">${(geo[i]*100).toFixed(2)}%</div>
+      <div class="w-card-rank">Rank #${rank+1}</div>
+    </div>`).join('')+'</div>';
+  el.innerHTML=h;
+}
+
+function aRenderIndividual(){
+  const el=document.getElementById('a-individual-content');
+  if(!allRecords.length){el.innerHTML=empty('No responses yet.');return;}
+  const geo=geoMean();
+  const sorted=[...geo.keys()].sort((a,b)=>geo[b]-geo[a]);
+  // comparison table with clickable name headers
+  let h=`<div style="overflow-x:auto"><table class="u-table"><thead><tr><th>Category</th>`;
+  allRecords.forEach((r,ri)=>{ h+=`<th><button onclick="showPersonDetail(${ri})" style="background:none;border:none;color:var(--accent);font-family:var(--mono);font-size:0.78rem;cursor:pointer;padding:0;text-decoration:underline dotted">${r.name}</button></th>`; });
+  h+='<th style="color:var(--gold)">Consensus</th></tr></thead><tbody>';
+  sorted.forEach(i=>{
+    h+=`<tr><td style="font-size:0.78rem">${CATS[i]}</td>`;
+    allRecords.forEach(r=>{ h+=`<td style="font-family:var(--mono);font-size:0.76rem">${r.weights&&r.weights[i]!=null?(+r.weights[i]*100).toFixed(1)+'%':'—'}</td>`; });
+    h+=`<td style="font-family:var(--mono);font-size:0.76rem;color:var(--gold)">${(geo[i]*100).toFixed(2)}%</td></tr>`;
+  });
+  el.innerHTML=h+'</tbody></table></div><p style="font-size:0.76rem;color:var(--muted);margin-top:0.75rem">Click a respondent\'s name above to view their individual weights and pairwise matrix.</p>';
+  document.getElementById('a-person-detail').style.display='none';
+}
+
+function showPersonDetail(ri){
+  const r=allRecords[ri];
+  if(!r) return;
+
+  // header
+  const initials=r.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('pd-initials').textContent=initials;
+  document.getElementById('pd-name').textContent=r.name;
+  const cr=+r.CR||0;
+  const pill=document.getElementById('pd-cr-pill');
+  pill.textContent=`CR = ${(cr*100).toFixed(2)}% · ${cr<0.1?'Consistent':cr<0.2?'Borderline':'Inconsistent'}`;
+  pill.className='cr-pill '+(cr<0.1?'ok':cr<0.2?'warn':'bad');
+  document.getElementById('pd-ts').textContent=r.savedAt?'Submitted: '+new Date(r.savedAt).toLocaleString('en-IN'):'';
+
+  // weights — sorted by their own weights descending
+  if(r.weights){
+    const ws=Array.from(r.weights);
+    const sorted=[...ws.keys()].sort((a,b)=>ws[b]-ws[a]);
+    const mx=Math.max(...ws);
+    let bars='<div><div style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem">Priority Weights</div><div class="result-bars">';
+    bars+=sorted.map(i=>`
+      <div class="rbar-row">
+        <div class="rbar-name">${SHORT[i]}</div>
+        <div><div class="rbar-track"><div class="rbar-fill" style="width:${(ws[i]/mx*100).toFixed(1)}%"></div></div></div>
+        <div class="rbar-pct">${(ws[i]*100).toFixed(2)}%</div>
+      </div>`).join('');
+    bars+='</div></div>';
+
+    let cards='<div><div style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem">Weight Cards</div><div class="w-cards">';
+    cards+=sorted.map((i,rank)=>`
+      <div class="w-card">
+        <div class="w-card-name">${CATS[i]}</div>
+        <div class="w-card-val">${(ws[i]*N).toFixed(3)}</div>
+        <div class="w-card-sub">${(ws[i]*100).toFixed(2)}%</div>
+        <div class="w-card-rank">Rank #${rank+1}</div>
+      </div>`).join('');
+    cards+='</div></div>';
+    document.getElementById('pd-weight-grid').innerHTML=bars+cards;
+    document.getElementById('pd-weight-grid').style.gridTemplateColumns='1fr 1fr';
+  } else {
+    document.getElementById('pd-weight-grid').innerHTML='<p style="color:var(--muted);font-size:0.82rem">No weight data available.</p>';
+  }
+
+  // individual matrix
+  if(r.sliderVals){
+    const sv=r.sliderVals;
+    const mat=Array.from({length:N},()=>new Array(N).fill(1));
+    PAIRS.forEach(([i,j],idx)=>{ const rat=ratio(sv[idx]||0); mat[i][j]=rat; mat[j][i]=1/rat; });
+    const {w}=ahp(mat);
+    let mh='<thead><tr><th class="rh"></th>';
+    SHORT.forEach(s=>{ mh+=`<th>${s}</th>`; });
+    mh+='<th style="color:var(--gold)">Priority</th></tr></thead><tbody>';
+    for(let i=0;i<N;i++){
+      mh+=`<tr><th class="rh">${SHORT[i]}</th>`;
+      for(let j=0;j<N;j++){
+        if(i===j){mh+='<td class="diag">1.00</td>';}
+        else{const v=mat[i][j];mh+=`<td>${v>=1?v.toFixed(2):'1/'+(1/v).toFixed(2)}</td>`;}
+      }
+      mh+=`<td class="pri">${(w[i]*100).toFixed(2)}%</td></tr>`;
+    }
+    document.getElementById('pd-matrix').innerHTML=mh+'</tbody>';
+  } else {
+    document.getElementById('pd-matrix').innerHTML='<tr><td style="color:var(--muted);padding:1rem">No slider data available.</td></tr>';
+  }
+
+  const detail=document.getElementById('a-person-detail');
+  detail.style.display='block';
+  detail.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function aRenderMatrix(){
+  const el=document.getElementById('a-matrix-content');
+  if(!allRecords.length){el.innerHTML=empty('No responses yet.');return;}
+  const cnt=allRecords.length;
+  const gm=Array.from({length:N},()=>new Array(N).fill(1));
+  allRecords.forEach(r=>{
+    if(!r.sliderVals)return;
+    PAIRS.forEach(([i,j],idx)=>{
+      const v=r.sliderVals[idx]||0, rat=ratio(v);
+      gm[i][j]*=rat; gm[j][i]*=(1/rat);
+    });
+  });
+  for(let i=0;i<N;i++) for(let j=0;j<N;j++) if(i!==j) gm[i][j]=Math.pow(gm[i][j],1/cnt);
+  const {w}=ahp(gm);
+  let h='<div class="matrix-wrap"><table class="matrix-tbl"><thead><tr><th class="rh"></th>';
+  SHORT.forEach(s=>{ h+=`<th>${s}</th>`; });
+  h+='<th style="color:var(--gold)">Priority</th></tr></thead><tbody>';
+  for(let i=0;i<N;i++){
+    h+=`<tr><th class="rh">${SHORT[i]}</th>`;
+    for(let j=0;j<N;j++){
+      if(i===j){h+='<td class="diag">1.00</td>';}
+      else{const v=gm[i][j];h+=`<td>${v>=1?v.toFixed(2):'1/'+(1/v).toFixed(2)}</td>`;}
+    }
+    h+=`<td class="pri">${(w[i]*100).toFixed(2)}%</td></tr>`;
+  }
+  el.innerHTML=h+'</tbody></table></div>';
+}
+
+function aRenderExport(){
+  const el=document.getElementById('a-export-box');
+  if(!allRecords.length){el.textContent='// No responses yet.';return;}
+  const geo=geoMean();
+  const py=CATS.map((c,i)=>`    "${c}": ${(geo[i]*N).toFixed(4)},`).join('\n');
+  const ind=allRecords.map(r=>`  "${r.name}": {${CATS.map((c,i)=>`"${c}":${r.weights?+(+r.weights[i]*N).toFixed(4):0}`).join(',')}}`).join(',\n');
+  el.textContent=`# CONSENSUS weights (geometric mean, n=${allRecords.length})\nSENSITIVITY_WEIGHTS_CONSENSUS = {\n${py}\n}\n\n# INDIVIDUAL weights\nSENSITIVITY_WEIGHTS_INDIVIDUAL = {\n${ind}\n}`;
+}
+
+function geoMean(){
+  const g=new Array(N).fill(1);
+  allRecords.forEach(r=>{ if(r.weights) r.weights.forEach((w,i)=>{ g[i]*=+w; }); });
+  const raw=g.map(v=>Math.pow(v,1/allRecords.length));
+  const sum=raw.reduce((a,b)=>a+b,0);
+  return raw.map(v=>v/sum);
+}
+
+// ══ ADMIN: EXPORT ════════════════════════════════════════════════════════════
+function aCopyPython(){
+  const geo=geoMean();
+  const t=CATS.map((c,i)=>`    "${c}": ${(geo[i]*N).toFixed(4)},`).join('\n');
+  navigator.clipboard.writeText(`SENSITIVITY_WEIGHTS_CONSENSUS = {\n${t}\n}`);
+}
+
+// ── Excel helpers ────────────────────────────────────────────────────────────
+function xlsEscape(v){ return typeof v==='string'?v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):v; }
+
+function buildXls(sheetsData){
+  // sheetsData: [{name, rows:[{cells:[{v,bold,color,bg,align}]}]}]
+  let wb='<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel"><Styles>';
+  wb+='<Style ss:ID="h"><Font ss:Bold="1"/><Interior ss:Color="#1a1e28" ss:Pattern="Solid"/><Font ss:Color="#f59e0b" ss:Bold="1"/></Style>';
+  wb+='<Style ss:ID="b"><Font ss:Bold="1"/></Style>';
+  wb+='<Style ss:ID="g"><Font ss:Color="#f59e0b" ss:Bold="1"/></Style>';
+  wb+='<Style ss:ID="ok"><Font ss:Color="#059669"/></Style>';
+  wb+='<Style ss:ID="num"><NumberFormat ss:Format="0.0000"/></Style>';
+  wb+='<Style ss:ID="pct"><NumberFormat ss:Format="0.00%"/></Style>';
+  wb+='</Styles>';
+  sheetsData.forEach(({name,rows})=>{
+    wb+=`<Worksheet ss:Name="${xlsEscape(name)}"><Table>`;
+    rows.forEach(({cells})=>{
+      wb+='<Row>';
+      cells.forEach(({v='',style='',type})=>{
+        const t=type||(typeof v==='number'?'Number':'String');
+        wb+=`<Cell${style?` ss:StyleID="${style}"`:''}><Data ss:Type="${t}">${xlsEscape(String(v))}</Data></Cell>`;
+      });
+      wb+='</Row>';
+    });
+    wb+='</Table></Worksheet>';
+  });
+  wb+='</Workbook>';
+  return wb;
+}
+
+function downloadXls(filename, sheetsData){
+  const xml=buildXls(sheetsData);
+  const blob=new Blob([xml],{type:'application/vnd.ms-excel'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+}
+
+function aDownloadExcelConsensus(){
+  if(!allRecords.length){alert('No responses yet.');return;}
+  const geo=geoMean();
+  const sorted=[...geo.keys()].sort((a,b)=>geo[b]-geo[a]);
+  const rows=[
+    {cells:[{v:'Category',style:'b'},{v:'AHP Weight (normalised)',style:'b'},{v:'Priority Score (×N)',style:'b'},{v:'Rank',style:'b'}]},
+    ...sorted.map((i,rank)=>({cells:[
+      {v:CATS[i]},
+      {v:+(geo[i]).toFixed(6),type:'Number',style:'num'},
+      {v:+(geo[i]*N).toFixed(4),type:'Number',style:'num'},
+      {v:rank+1,type:'Number'}
+    ]})),
+    {cells:[]},
+    {cells:[{v:`n = ${allRecords.length} respondents · Geometric mean aggregation · Saaty (1980)`}]}
+  ];
+  downloadXls('AHP_Consensus_Weights.xls',[{name:'Consensus Weights',rows}]);
+}
+
+function aDownloadExcelIndividual(){
+  if(!allRecords.length){alert('No responses yet.');return;}
+  const geo=geoMean();
+  const sorted=[...geo.keys()].sort((a,b)=>geo[b]-geo[a]);
+  // Sheet 1: side-by-side
+  const hdr=[{v:'Category',style:'b'},...allRecords.map(r=>({v:r.name,style:'b'})),{v:'Consensus',style:'g'}];
+  const dataRows=sorted.map(i=>({cells:[
+    {v:CATS[i]},
+    ...allRecords.map(r=>({v:r.weights?+(+r.weights[i]).toFixed(6):0,type:'Number',style:'num'})),
+    {v:+(geo[i]).toFixed(6),type:'Number',style:'num'}
+  ]}));
+  const sheet1={name:'Individual vs Consensus',rows:[{cells:hdr},...dataRows]};
+
+  // One sheet per respondent
+  const indSheets=allRecords.map(r=>{
+    const ws=Array.from(r.weights||new Array(N).fill(0));
+    const rs=[...ws.keys()].sort((a,b)=>ws[b]-ws[a]);
+    return {name:r.name.slice(0,30),rows:[
+      {cells:[{v:'Category',style:'b'},{v:'Weight',style:'b'},{v:'Priority (×N)',style:'b'},{v:'Rank',style:'b'},{v:'CR',style:'b'}]},
+      ...rs.map((i,rank)=>({cells:[
+        {v:CATS[i]},
+        {v:+(ws[i]).toFixed(6),type:'Number',style:'num'},
+        {v:+(ws[i]*N).toFixed(4),type:'Number',style:'num'},
+        {v:rank+1,type:'Number'},
+        {v:rank===0?+(+r.CR||0).toFixed(4):'',...(rank===0?{type:'Number'}:{})}
+      ]}))
+    ]};
+  });
+  downloadXls('AHP_Individual_Weights.xls',[sheet1,...indSheets]);
+}
+
+function aDownloadExcelMatrix(){
+  if(!allRecords.length){alert('No responses yet.');return;}
+  // Consensus matrix sheet
+  const cnt=allRecords.length;
+  const gm=Array.from({length:N},()=>new Array(N).fill(1));
+  allRecords.forEach(r=>{
+    if(!r.sliderVals)return;
+    PAIRS.forEach(([i,j],idx)=>{ const rat=ratio(r.sliderVals[idx]||0); gm[i][j]*=rat; gm[j][i]*=(1/rat); });
+  });
+  for(let i=0;i<N;i++) for(let j=0;j<N;j++) if(i!==j) gm[i][j]=Math.pow(gm[i][j],1/cnt);
+  const {w}=ahp(gm);
+
+  const hdr={cells:[{v:'',style:'b'},...SHORT.map(s=>({v:s,style:'b'})),{v:'Priority',style:'g'}]};
+  const matRows=CATS.map((c,i)=>({cells:[
+    {v:SHORT[i],style:'b'},
+    ...gm[i].map((v,j)=>({v:i===j?1:+(v).toFixed(4),type:'Number',style:'num'})),
+    {v:+(w[i]).toFixed(6),type:'Number',style:'num'}
+  ]}));
+
+  // Per-person matrix sheets
+  const indMatSheets=allRecords.map(r=>{
+    if(!r.sliderVals) return {name:r.name.slice(0,28)+' mat',rows:[{cells:[{v:'No data'}]}]};
+    const mat=Array.from({length:N},()=>new Array(N).fill(1));
+    PAIRS.forEach(([i,j],idx)=>{ const rat=ratio(r.sliderVals[idx]||0); mat[i][j]=rat; mat[j][i]=1/rat; });
+    const {w:rw}=ahp(mat);
+    const rHdr={cells:[{v:'',style:'b'},...SHORT.map(s=>({v:s,style:'b'})),{v:'Priority',style:'g'}]};
+    const rRows=CATS.map((c,i)=>({cells:[
+      {v:SHORT[i],style:'b'},
+      ...mat[i].map((v,j)=>({v:i===j?1:+(v).toFixed(4),type:'Number',style:'num'})),
+      {v:+(rw[i]).toFixed(6),type:'Number',style:'num'}
+    ]}));
+    return {name:(r.name.slice(0,28)+' mat'),rows:[rHdr,...rRows]};
+  });
+
+  downloadXls('AHP_Matrices.xls',[{name:'Consensus Matrix',rows:[hdr,...matRows]},...indMatSheets]);
+}
+
+function aDownloadJSON(){
+  const geo=geoMean();
+  const obj={method:'AHP',citation:'Saaty (1980)',exportedAt:new Date().toISOString(),
+    respondents:allRecords.length,
+    consensusWeights:Object.fromEntries(CATS.map((c,i)=>[c,+(geo[i]*N).toFixed(4)])),
+    individual:allRecords.map(r=>({name:r.name,CR:r.CR,savedAt:r.savedAt,
+      weights:r.weights?Object.fromEntries(CATS.map((c,i)=>[c,+(+r.weights[i]*N).toFixed(4)])):null}))};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}));
+  a.download='AHP_Admin_Export.json'; a.click();
+}
+
+// ══ ADMIN: TABS ═══════════════════════════════════════════════════════════════
+function aTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function empty(msg){ return `<div class="empty-state"><div class="icon">📭</div><div>${msg}</div></div>`; }
+</script>
+</body>
+</html>
